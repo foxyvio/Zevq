@@ -1,7 +1,4 @@
-use crate::{
-    parser::parse_rust_source,
-    solver::{report_to_json, verify_findings},
-};
+use crate::audit::audit_payload_json;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
@@ -14,8 +11,7 @@ pub extern "C" fn zevq_audit_source(input: *const c_char) -> *mut c_char {
     }
 
     let source = unsafe { CStr::from_ptr(input) }.to_string_lossy();
-    let report = verify_findings(parse_rust_source(&source));
-    let json = report_to_json(&report)
+    let json = audit_payload_json(&source)
         .unwrap_or_else(|error| format!("{{\"status\":\"Crash\",\"error\":\"{error}\"}}"));
     CString::new(json).unwrap().into_raw()
 }

@@ -1,20 +1,18 @@
 # Zevq AI
 
-Zevq AI is an enterprise AI safety and certification prototype that combines a Rust-first verification core, a Next.js telemetry portal, and a Flutter-ready local shell.
+Zevq AI is now a Rust + Flutter safety-certification prototype. The web/Next.js layer has been removed so all executable safety logic lives in Rust and all operator-facing UI is delivered through Flutter for desktop, mobile, and air-gapped deployments.
 
-## Architecture ratios
+## Architecture allocation
 
-- **Rust core (50%+)**: AST parsing, vulnerability extraction, SMT/Z3 solver checks, async verification orchestration, and FFI-safe report shapes.
-- **Next.js + TypeScript (30%)**: enterprise audit API and dashboard for high-density vulnerability reporting.
-- **Flutter + Dart (20%)**: cross-platform wrapper scaffold for local or air-gapped execution through a native Rust bridge.
+- **Rust core (70%+)**: AST parsing, vulnerability extraction, SMT/Z3 solver checks, Wizard-of-Oz audit emulation, async orchestration, and FFI-safe report serialization.
+- **Flutter + Dart shell (30%)**: localized enterprise dashboard and native bridge boundary for closed-network execution.
 
 ## Repository map
 
 - `backend/`: Rust verification engine.
   - `src/parser.rs`: `syn` visitor that extracts arithmetic, SQL string-concat, and tool-authorization findings.
   - `src/solver.rs`: Z3-backed bounded checks that turn parsed findings into counter-example reports.
-  - `src/main.rs`: Tokio API entrypoint with enum-based errors.
-  - `src/ffi.rs`: C ABI bridge that exposes a JSON audit report to Flutter or other native hosts.
-- `pages/api/audit.ts`: Wizard-of-Oz audit proxy that sanitizes inbound text and emits deterministic crash reports.
-- `components/Dashboard.tsx`: matte white/orange/pink enterprise dashboard.
-- `zevq_desktop_mobile/`: Flutter shell scaffold with a Rust bridge boundary.
+  - `src/audit.rs`: Rust-native audit facade replacing the old Next.js API route; sanitizes payloads and emits deterministic crash reports.
+  - `src/main.rs`: Tokio CLI entrypoint with enum-based errors.
+  - `src/ffi.rs`: C ABI bridge that exposes JSON audit reports to Flutter or other native hosts.
+- `zevq_desktop_mobile/`: Flutter shell that calls the Rust cdylib directly through Dart FFI.

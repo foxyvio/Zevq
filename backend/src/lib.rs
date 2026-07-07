@@ -1,3 +1,4 @@
+pub mod audit;
 pub mod ffi;
 pub mod parser;
 pub mod solver;
