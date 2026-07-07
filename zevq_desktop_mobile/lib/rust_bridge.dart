@@ -9,20 +9,25 @@ typedef _FreeNative = Void Function(Pointer<Utf8> ptr);
 typedef _FreeDart = void Function(Pointer<Utf8> ptr);
 
 class ZevqRustBridge {
-  ZevqRustBridge({DynamicLibrary? library}) : _library = library ?? _openLibrary();
+  ZevqRustBridge({DynamicLibrary? library}) : _injectedLibrary = library;
 
-  final DynamicLibrary _library;
+  final DynamicLibrary? _injectedLibrary;
 
   String assessStartup(String profileJsonOrName) {
-    final assess = _library.lookupFunction<_AssessNative, _AssessDart>('zevq_assess_startup');
-    final release = _library.lookupFunction<_FreeNative, _FreeDart>('zevq_free_string');
-    final input = profileJsonOrName.toNativeUtf8();
-    final output = assess(input);
     try {
-      return output.toDartString();
-    } finally {
-      calloc.free(input);
-      release(output);
+      final library = _injectedLibrary ?? _openLibrary();
+      final assess = library.lookupFunction<_AssessNative, _AssessDart>('zevq_assess_startup');
+      final release = library.lookupFunction<_FreeNative, _FreeDart>('zevq_free_string');
+      final input = profileJsonOrName.toNativeUtf8();
+      final output = assess(input);
+      try {
+        return output.toDartString();
+      } finally {
+        calloc.free(input);
+        release(output);
+      }
+    } catch (error) {
+      return '{"verdict":"REJECT_FOR_NOW","error":"Rust engine unavailable: $error"}';
     }
   }
 

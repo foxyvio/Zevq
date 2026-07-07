@@ -33,8 +33,18 @@ class ZevqHome extends StatefulWidget {
 
 class _ZevqHomeState extends State<ZevqHome> {
   final _bridge = ZevqRustBridge();
-  final _profileController = TextEditingController(text: 'Confident AI');
-  String _report = 'Paste a startup profile JSON or enter a startup name, then run the local Rust rating engine.';
+  final _profileController = TextEditingController(text: '''{
+  "name": "Confident AI",
+  "domain": "ai_evaluation",
+  "claimed_accuracy": 0.94,
+  "eval_pass_rate": 0.87,
+  "adversarial_resilience": 0.71,
+  "data_governance": 0.68,
+  "incidents_last_90_days": 2,
+  "p95_latency_ms": 420.0,
+  "has_human_override": false
+}''');
+  String _report = 'Paste a startup evidence JSON profile, then run the local Rust rating engine.';
 
   void _runAssessment() {
     setState(() {
@@ -63,18 +73,24 @@ class _ZevqHomeState extends State<ZevqHome> {
               const SizedBox(height: 24),
               TextField(
                 controller: _profileController,
-                minLines: 3,
-                maxLines: 8,
+                minLines: 8,
+                maxLines: 12,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFFF9FAFB),
                   focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Color(0xFFFF6B35), width: 2)),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-                  labelText: 'Startup name or JSON evidence profile',
+                  labelText: 'Startup evidence JSON profile',
                 ),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6B35), foregroundColor: Colors.white), onPressed: _runAssessment, child: const Text('Run Mathematical Rating')),
+              Row(
+                children: [
+                  ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6B35), foregroundColor: Colors.white), onPressed: _runAssessment, child: const Text('Run Mathematical Rating')),
+                  const SizedBox(width: 16),
+                  const Text('Offline Rust engine via FFI', style: TextStyle(color: Color(0xFF4B5563))),
+                ],
+              ),
               const SizedBox(height: 24),
               Expanded(
                 child: Container(

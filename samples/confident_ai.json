@@ -1,0 +1,11 @@
+{
+  "name": "Confident AI",
+  "domain": "ai_evaluation",
+  "claimed_accuracy": 0.94,
+  "eval_pass_rate": 0.87,
+  "adversarial_resilience": 0.71,
+  "data_governance": 0.68,
+  "incidents_last_90_days": 2,
+  "p95_latency_ms": 420.0,
+  "has_human_override": false
+}

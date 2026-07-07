@@ -1,20 +1,15 @@
-use crate::{assess_startup, assessment::assessment_to_json, parse_or_default_profile};
+use crate::assessment::assess_payload_json;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
 #[no_mangle]
 pub extern "C" fn zevq_assess_startup(input: *const c_char) -> *mut c_char {
     if input.is_null() {
-        return CString::new("{\"verdict\":\"REJECT_FOR_NOW: null input\"}")
-            .unwrap()
-            .into_raw();
+        return safe_c_string("{\"verdict\":\"REJECT_FOR_NOW\",\"error\":\"null input\"}");
     }
 
     let payload = unsafe { CStr::from_ptr(input) }.to_string_lossy();
-    let profile = parse_or_default_profile(&payload);
-    let json = assessment_to_json(&assess_startup(profile))
-        .unwrap_or_else(|error| format!("{{\"verdict\":\"REJECT_FOR_NOW: {error}\"}}"));
-    CString::new(json).unwrap().into_raw()
+    safe_c_string(&assess_payload_json(&payload))
 }
 
 #[no_mangle]
@@ -30,4 +25,14 @@ pub extern "C" fn zevq_free_string(ptr: *mut c_char) {
     unsafe {
         let _ = CString::from_raw(ptr);
     }
+}
+
+fn safe_c_string(value: &str) -> *mut c_char {
+    let sanitized = value.replace('\0', "");
+    CString::new(sanitized)
+        .unwrap_or_else(|_| {
+            CString::new("{\"verdict\":\"REJECT_FOR_NOW\",\"error\":\"invalid native string\"}")
+                .expect("static fallback has no nul")
+        })
+        .into_raw()
 }
