@@ -1,0 +1,5 @@
+/backend/target/
+node_modules/
+.next/
+build/
+.dart_tool/

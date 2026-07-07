@@ -1,0 +1,12 @@
+name: zevq_desktop_mobile
+description: Air-gapped Zevq AI desktop and mobile shell.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  ffi: ^2.1.2
