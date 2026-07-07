@@ -1,19 +1,25 @@
-use crate::audit::audit_payload_json;
+use crate::{assess_startup, assessment::assessment_to_json, parse_or_default_profile};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
 #[no_mangle]
-pub extern "C" fn zevq_audit_source(input: *const c_char) -> *mut c_char {
+pub extern "C" fn zevq_assess_startup(input: *const c_char) -> *mut c_char {
     if input.is_null() {
-        return CString::new("{\"status\":\"Crash\",\"error\":\"null input\"}")
+        return CString::new("{\"verdict\":\"REJECT_FOR_NOW: null input\"}")
             .unwrap()
             .into_raw();
     }
 
-    let source = unsafe { CStr::from_ptr(input) }.to_string_lossy();
-    let json = audit_payload_json(&source)
-        .unwrap_or_else(|error| format!("{{\"status\":\"Crash\",\"error\":\"{error}\"}}"));
+    let payload = unsafe { CStr::from_ptr(input) }.to_string_lossy();
+    let profile = parse_or_default_profile(&payload);
+    let json = assessment_to_json(&assess_startup(profile))
+        .unwrap_or_else(|error| format!("{{\"verdict\":\"REJECT_FOR_NOW: {error}\"}}"));
     CString::new(json).unwrap().into_raw()
+}
+
+#[no_mangle]
+pub extern "C" fn zevq_audit_source(input: *const c_char) -> *mut c_char {
+    zevq_assess_startup(input)
 }
 
 #[no_mangle]

@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
-typedef _AuditNative = Pointer<Utf8> Function(Pointer<Utf8> input);
-typedef _AuditDart = Pointer<Utf8> Function(Pointer<Utf8> input);
+typedef _AssessNative = Pointer<Utf8> Function(Pointer<Utf8> input);
+typedef _AssessDart = Pointer<Utf8> Function(Pointer<Utf8> input);
 typedef _FreeNative = Void Function(Pointer<Utf8> ptr);
 typedef _FreeDart = void Function(Pointer<Utf8> ptr);
 
@@ -13,11 +13,11 @@ class ZevqRustBridge {
 
   final DynamicLibrary _library;
 
-  String auditSource(String source) {
-    final audit = _library.lookupFunction<_AuditNative, _AuditDart>('zevq_audit_source');
+  String assessStartup(String profileJsonOrName) {
+    final assess = _library.lookupFunction<_AssessNative, _AssessDart>('zevq_assess_startup');
     final release = _library.lookupFunction<_FreeNative, _FreeDart>('zevq_free_string');
-    final input = source.toNativeUtf8();
-    final output = audit(input);
+    final input = profileJsonOrName.toNativeUtf8();
+    final output = assess(input);
     try {
       return output.toDartString();
     } finally {

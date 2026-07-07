@@ -1,18 +1,27 @@
 # Zevq AI
 
-Zevq AI is now a Rust + Flutter safety-certification prototype. The web/Next.js layer has been removed so all executable safety logic lives in Rust and all operator-facing UI is delivered through Flutter for desktop, mobile, and air-gapped deployments.
+Zevq AI is a Rust + Flutter mathematical rating engine for AI startups. It is designed as a local, air-gapped "Moody's for AI safety" prototype: Rust performs deterministic startup assessment math, while Flutter presents the operator dashboard.
 
-## Architecture allocation
+## What it does now
 
-- **Rust core (70%+)**: AST parsing, vulnerability extraction, SMT/Z3 solver checks, Wizard-of-Oz audit emulation, async orchestration, and FFI-safe report serialization.
-- **Flutter + Dart shell (30%)**: localized enterprise dashboard and native bridge boundary for closed-network execution.
+- Scores an AI startup profile across reliability, safety, and governance.
+- Uses explicit formulas for claim-vs-evaluation gaps, adversarial resilience, incident penalties, latency penalties, and human-override controls.
+- Emits a rating ladder: `Aaa`, `Aa`, `A`, `Bbb`, `Bb`, `B`, or `C`.
+- Returns a verdict: `CERTIFY`, `CONDITIONAL`, or `REJECT_FOR_NOW`.
+- Exposes a C ABI bridge so Flutter can call the Rust engine offline.
 
 ## Repository map
 
-- `backend/`: Rust verification engine.
-  - `src/parser.rs`: `syn` visitor that extracts arithmetic, SQL string-concat, and tool-authorization findings.
-  - `src/solver.rs`: Z3-backed bounded checks that turn parsed findings into counter-example reports.
-  - `src/audit.rs`: Rust-native audit facade replacing the old Next.js API route; sanitizes payloads and emits deterministic crash reports.
-  - `src/main.rs`: Tokio CLI entrypoint with enum-based errors.
-  - `src/ffi.rs`: C ABI bridge that exposes JSON audit reports to Flutter or other native hosts.
-- `zevq_desktop_mobile/`: Flutter shell that calls the Rust cdylib directly through Dart FFI.
+- `backend/src/assessment.rs`: mathematical assessment engine, scenarios, scoring formulas, ratings, and tests.
+- `backend/src/main.rs`: Tokio CLI entrypoint for local batch assessment.
+- `backend/src/ffi.rs`: native bridge exported to Flutter as `zevq_assess_startup` with the legacy `zevq_audit_source` alias.
+- `zevq_desktop_mobile/lib/main.dart`: Flutter operator dashboard for startup profile input and rating output.
+- `zevq_desktop_mobile/lib/rust_bridge.dart`: Dart FFI wrapper around the Rust shared library.
+
+## Example CLI
+
+```bash
+cargo run --manifest-path backend/Cargo.toml -- 'Confident AI'
+```
+
+The default benchmark intentionally grades weak evidence harshly so strong AI startups must prove their claims mathematically instead of marketing their way through certification.

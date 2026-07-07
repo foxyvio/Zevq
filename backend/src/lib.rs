@@ -1,7 +1,6 @@
-pub mod audit;
+pub mod assessment;
 pub mod ffi;
-pub mod parser;
-pub mod solver;
 
-pub use parser::{Finding, FindingKind, RiskLevel};
-pub use solver::{CounterExample, VerificationReport, VerificationStatus};
+pub use assessment::{
+    assess_startup, parse_or_default_profile, AssessmentReport, Rating, StartupProfile,
+};

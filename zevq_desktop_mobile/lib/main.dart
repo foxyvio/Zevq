@@ -12,7 +12,8 @@ class ZevqShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Zevq AI',
+      debugShowCheckedModeBanner: false,
+      title: 'Zevq AI Ratings',
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFFFFFFF),
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF6B35)),
@@ -32,28 +33,59 @@ class ZevqHome extends StatefulWidget {
 
 class _ZevqHomeState extends State<ZevqHome> {
   final _bridge = ZevqRustBridge();
-  String _report = 'Awaiting local audit.';
+  final _profileController = TextEditingController(text: 'Confident AI');
+  String _report = 'Paste a startup profile JSON or enter a startup name, then run the local Rust rating engine.';
 
-  void _runAudit() {
+  void _runAssessment() {
     setState(() {
-      _report = _bridge.auditSource('fn main(){ let x = 1 / (z - 5); }');
+      _report = _bridge.assessStartup(_profileController.text);
     });
+  }
+
+  @override
+  void dispose() {
+    _profileController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Zevq AI Air-Gapped Console', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 16),
-            ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6B35)), onPressed: _runAudit, child: const Text('Run Local Rust Audit')),
-            const SizedBox(height: 24),
-            Container(width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFFFF94B4), borderRadius: BorderRadius.circular(20)), child: Text(_report, style: const TextStyle(color: Color(0xFF4B5563)))),
-          ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Zevq AI Startup Ratings', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 8),
+              const Text('Mathematical safety, reliability, and governance scoring for AI startups.', style: TextStyle(color: Color(0xFF4B5563), fontSize: 16)),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _profileController,
+                minLines: 3,
+                maxLines: 8,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFF9FAFB),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Color(0xFFFF6B35), width: 2)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                  labelText: 'Startup name or JSON evidence profile',
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6B35), foregroundColor: Colors.white), onPressed: _runAssessment, child: const Text('Run Mathematical Rating')),
+              const SizedBox(height: 24),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(color: const Color(0xFFFF94B4), borderRadius: BorderRadius.circular(20)),
+                  child: SingleChildScrollView(child: Text(_report, style: const TextStyle(color: Color(0xFF4B5563), fontFamily: 'monospace'))),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
